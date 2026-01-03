@@ -1,4 +1,4 @@
-import { Image } from '../models.js';
+import { Image, AllImage, User } from '../models.js';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import multer from 'multer';
@@ -29,15 +29,14 @@ const uploadToCloudinary = (fileBuffer) => {
     });
 };
 
-export const getImages = async (req, res) => {
-    const images = await Image.find({});
+export const getAllImages = async (req, res) => {
+    const images = await AllImage.find({});
     res.status(200).json(images);
 }
 // Upload images and save URLs to DB
-export const sendImages = [
+export const sendAllImages = [
     upload.array("images"), // "images" = name of field in FormData
     async (req, res) => {
-        const userId = req.userId;
 
         if (!req.files || req.files.length === 0) {
             return res.status(400).json({ message: "No images uploaded" });
@@ -52,13 +51,31 @@ export const sendImages = [
             }
 
             // Save URLs in MongoDB
-            const imageDoc = new Image({ url: uploadedUrls, userId });
+            const imageDoc = new AllImage({ url: uploadedUrls });
             await imageDoc.save();
 
-            res.status(201).json(imageDoc);
+            res.status(201).json({ urls: uploadedUrls });
         } catch (error) {
             console.error(error);
             res.status(500).json({ message: "Upload failed" });
         }
     }
 ];
+
+export const sendImages = async (req, res) => {
+    const userID = req.userId.id;
+    const idOfUser = await User.findOne({ email: userID });
+    if (!idOfUser) return res.status(400).json({ message: 'User does not exist' });
+    const { urls } = req.body;
+    const imageDoc = new Image({ url: urls, userId: idOfUser._id });
+    await imageDoc.save();
+    res.status(201).json(urls);
+}
+
+export const getImages = async (req, res) => {
+    const userID = req.userId.id;
+    const idOfUser = await User.findOne({ email: userID });
+    if (!idOfUser) return res.status(400).json({ message: 'User does not exist' });
+    const images = await Image.find({ userId: idOfUser._id });
+    res.status(200).json(images);
+}

@@ -12,9 +12,15 @@ const userSchema = new mongoose.Schema({
 
 const imageSchema = new mongoose.Schema({
     url: [String],
-    userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', default: null }
+    userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', default: null },
+    date: { type: Date, default: Date.now } || null
 });
 
+const allimageSchema = new mongoose.Schema({
+    url: [String],
+    date: { type: Date, default: Date.now } || null
+});
 
 export const User = mongoose.model('User', userSchema);
 export const Image = mongoose.model('Image', imageSchema);
+export const AllImage = mongoose.model('AllImage', allimageSchema);
