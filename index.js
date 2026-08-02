@@ -9,12 +9,12 @@ const app = express();
 app.use(express.json());
 app.use(cors());
 
-app.get('/', (req, res) => {
+app.get('/api', (req, res) => {
     res.sendStatus(403);
 })
 
-app.use('/v1/api/auth', authRoutes);
-app.use('/v1/api/media', mediaRoutes);
+app.use('/api/v1/api/auth', authRoutes);
+app.use('/api/v1/api/media', mediaRoutes);
 
 app.listen(process.env.PORT, () => {
     console.log('listening on port ', process.env.PORT);
